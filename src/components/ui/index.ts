@@ -18,3 +18,5 @@ export { TextField } from './TextField';
 export { goBack } from './Screen';
 export { DayPicker } from './DayPicker';
 export { HScrollChips } from './HScrollChips';
+export { ProgressBar } from './ProgressBar';
+export { ScoreSelector } from './ScoreSelector';

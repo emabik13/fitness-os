@@ -21,8 +21,49 @@ export interface WeeklyMuscleSets {
   effective: number;
 }
 
+export interface MuscleVolume {
+  muscleGroupId: string;
+  name: string;
+  direct: number;
+  effective: number;
+}
+
 export function createStatsRepository(db: SqlExecutor) {
   return {
+    /** Direct (agonist) and effective (synergist = 0.5) completed sets per muscle since `fromIso`. */
+    async muscleVolume(userId: string, fromIso: string | null): Promise<MuscleVolume[]> {
+      const rows = await db.getAllAsync<MuscleVolume>(
+        `SELECT mg.id AS muscleGroupId, mg.name_es AS name,
+                SUM(CASE em.role WHEN 'agonist' THEN 1 ELSE 0 END) AS direct,
+                SUM(CASE em.role WHEN 'agonist' THEN 1.0 WHEN 'synergist' THEN 0.5 ELSE 0 END) AS effective
+           FROM workout_sets ws
+           JOIN workout_exercises we ON we.id = ws.workout_exercise_id AND we.deleted_at IS NULL
+           JOIN workouts w ON w.id = we.workout_id AND w.deleted_at IS NULL AND w.status = 'completed'
+           JOIN exercise_muscles em ON em.exercise_id = we.exercise_id
+           JOIN muscle_groups mg ON mg.id = em.muscle_group_id
+          WHERE w.user_id = ? AND w.started_at >= ? AND ws.deleted_at IS NULL AND ws.is_completed = 1
+            AND ws.set_type <> 'warmup'
+          GROUP BY mg.id HAVING effective > 0 ORDER BY effective DESC`,
+        [userId, fromIso ?? '0000'],
+      );
+      return rows;
+    },
+
+    /** Exercises ordered by number of sessions since `fromIso`. */
+    async topExercises(userId: string, fromIso: string | null, limit = 8) {
+      return db.getAllAsync<{ exerciseId: string; name: string; sessions: number; sets: number }>(
+        `SELECT e.id AS exerciseId, e.name_es AS name, COUNT(DISTINCT w.id) AS sessions, COUNT(ws.id) AS sets
+           FROM workout_sets ws
+           JOIN workout_exercises we ON we.id = ws.workout_exercise_id AND we.deleted_at IS NULL
+           JOIN workouts w ON w.id = we.workout_id AND w.deleted_at IS NULL AND w.status = 'completed'
+           JOIN exercises e ON e.id = we.exercise_id
+          WHERE w.user_id = ? AND w.started_at >= ? AND ws.deleted_at IS NULL AND ws.is_completed = 1
+            AND ws.set_type <> 'warmup'
+          GROUP BY e.id ORDER BY sessions DESC, sets DESC LIMIT ?`,
+        [userId, fromIso ?? '0000', limit],
+      );
+    },
+
     /** Completed working sets for a muscle bucketed by week (oldest first, `weeks` buckets ending this week). */
     async muscleWeeklySets(userId: string, muscleId: string, weeks = 8, now = new Date()): Promise<WeeklyMuscleSets[]> {
       const thisWeek = startOfWeek(now);

@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Sparkline } from '@/components/charts/Sparkline';
 import { AppText, Card, EmptyState, Screen, SectionHeader, SegmentedControl, StatTile } from '@/components/ui';
-import { RECORD_TYPE_LABELS } from '@/constants/labels';
+import { formatRecord, RECORD_TYPE_LABELS } from '@/constants/labels';
 import { createExerciseRepository } from '@/database/repositories/exerciseRepository';
 import { createWorkoutRepository } from '@/database/repositories/workoutRepository';
 import { frequencyPerWeek, perSessionStats } from '@/engine/statistics/exerciseStats';
@@ -95,8 +95,8 @@ export function ExerciseStatsScreen() {
               <AppText variant="callout" style={styles.flex}>
                 {RECORD_TYPE_LABELS[r.record_type] ?? r.record_type}
               </AppText>
-              <AppText variant="callout" color="accent">
-                {r.record_type === 'max_reps' ? `${r.value} reps` : `${formatKg(r.value)} kg`}
+              <AppText variant="callout" color="accent" style={styles.flex}>
+                {formatRecord(r.record_type, r.value, r.weight_kg, r.reps)}
               </AppText>
               <AppText variant="caption" color="textTertiary">
                 {formatShortDate(r.achieved_at)}

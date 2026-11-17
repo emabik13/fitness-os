@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, EmptyState, Screen, SectionHeader, StatTile } from '@/components/ui';
-import { RECORD_TYPE_LABELS } from '@/constants/labels';
+import { formatRecord, RECORD_TYPE_LABELS } from '@/constants/labels';
 import { createWorkoutRepository } from '@/database/repositories/workoutRepository';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { colors, spacing } from '@/theme';
@@ -63,9 +63,7 @@ export function WorkoutSummaryScreen() {
               <View style={styles.flex}>
                 <AppText variant="bodyStrong">{r.exerciseName}</AppText>
                 <AppText variant="footnote" color="textSecondary">
-                  {RECORD_TYPE_LABELS[r.type]}: {r.type === 'max_reps' ? `${r.value} reps` : `${formatKg(r.value)} kg`}
-                  {r.type === 'estimated_1rm' ? ' (estimación)' : ''}
-                  {r.weightKg ? ` · ${formatKg(r.weightKg)} kg × ${r.reps}` : ''}
+                  {RECORD_TYPE_LABELS[r.type]}: {formatRecord(r.type, r.value, r.weightKg, r.reps)}
                 </AppText>
               </View>
             </View>

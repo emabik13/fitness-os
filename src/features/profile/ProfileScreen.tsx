@@ -58,6 +58,9 @@ export function ProfileScreen() {
       <SectionHeader title="Registros" />
       <ListGroup>
         <ListRow icon="scale-outline" title="Peso corporal" onPress={() => router.push('/registro/peso')} />
+        <ListRow icon="resize-outline" title="Medidas corporales" onPress={() => router.push('/registro/medidas')} />
+        <ListRow icon="restaurant-outline" title="Nutrición" onPress={() => router.push('/nutricion')} />
+        <ListRow icon="moon-outline" title="Recuperación" onPress={() => router.push('/recuperacion')} />
       </ListGroup>
 
       {p ? (
@@ -89,6 +92,7 @@ export function ProfileScreen() {
       <ListGroup>
         <ListRow icon="phone-portrait-outline" title="Almacenamiento" subtitle="Tus datos se guardan solo en este dispositivo" trailing="Local" />
         <ListRow icon="server-outline" title="Base de datos" trailing={`Esquema v${schemaVersion}`} />
+        <ListRow icon="shield-checkmark-outline" title="Copia de seguridad y borrado" onPress={() => router.push('/datos')} />
       </ListGroup>
 
       <SectionHeader title="Aplicación" />

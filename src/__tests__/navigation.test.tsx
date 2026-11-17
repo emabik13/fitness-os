@@ -75,7 +75,8 @@ describe('navigation', () => {
     await renderApp();
     expect(screen).toHavePathname('/');
     expect(await screen.findByText('Sin rutina activa')).toBeTruthy();
-    expect(await screen.findByText('0 entrenamientos completados')).toBeTruthy();
+    expect(await screen.findByText('0 de 4 sesiones planificadas')).toBeTruthy();
+    expect(screen.getByLabelText('Generar mi rutina')).toBeTruthy();
     expect(screen.getByText('Sin récords todavía')).toBeTruthy();
   });
 
@@ -114,11 +115,11 @@ describe('navigation', () => {
       [ctx.userId, ts, ts, ts, ts],
     );
     await renderApp('/progreso');
-    expect(await screen.findByText('45')).toBeTruthy(); // 2700 s → 45 min
+    expect(await screen.findByText('45 min')).toBeTruthy(); // 2700 s
     await act(async () => {
       fireEvent.press(screen.getByLabelText('Todo'));
     });
-    expect(await screen.findByText('45')).toBeTruthy();
+    expect(await screen.findByText('45 min')).toBeTruthy();
   });
 
   it('profile shows saved data and fixed units', async () => {
@@ -167,6 +168,40 @@ describe('navigation', () => {
     await act(async () => fireEvent.press(screen.getByLabelText('Guardar y activar')));
     await waitFor(() => expect(screen).toHavePathname(expect.stringMatching(/^\/rutinas\/[^g]/)));
     expect(await screen.findByText('Rutina activa')).toBeTruthy();
+  });
+
+  it('nutrition: targets from profile, add a meal and water', async () => {
+    await renderApp('/nutricion');
+    await act(async () => fireEvent.changeText(await screen.findByLabelText('Calorías'), '650'));
+    await act(async () => fireEvent.changeText(screen.getByLabelText('Proteínas'), '40'));
+    await act(async () => fireEvent.press(screen.getByLabelText('Añadir')));
+    await act(async () => fireEvent.press(screen.getByLabelText('+500 ml')));
+    expect(await screen.findByText(/650 kcal · P 40 g/)).toBeTruthy();
+    // Protein target from the 80 kg profile weight (1.8–2.2 g/kg).
+    expect(screen.getByText(/40 \/ 145–175 g/)).toBeTruthy();
+    // Without sex in the profile, calories are not estimated.
+    await act(async () => fireEvent.press(screen.getByLabelText('¿De dónde salen estos objetivos?')));
+    expect(screen.getByText(/Sin el dato de sexo no se estima/)).toBeTruthy();
+  });
+
+  it('recovery: saves today once and updates it', async () => {
+    await renderApp('/recuperacion');
+    await act(async () => fireEvent.press(await screen.findByLabelText('Energía: 4 de 5')));
+    await act(async () => fireEvent.press(screen.getByLabelText('Guardar registro de hoy')));
+    expect(await screen.findByLabelText('Actualizar registro de hoy')).toBeTruthy();
+    const n = await ctx.db.getFirstAsync<{ n: number; e: number }>('SELECT COUNT(*) AS n, MAX(energy) AS e FROM recovery_entries');
+    expect(n).toEqual({ n: 1, e: 4 });
+  });
+
+  it('measurements: requires a method for body fat, then saves', async () => {
+    await renderApp('/registro/medidas');
+    await act(async () => fireEvent.changeText(await screen.findByLabelText('Cintura'), '84,5'));
+    await act(async () => fireEvent.changeText(screen.getByLabelText('% grasa'), '18'));
+    await act(async () => fireEvent.press(screen.getByLabelText('Guardar medidas')));
+    expect(await screen.findByText('Indica cómo se obtuvo el % de grasa')).toBeTruthy();
+    await act(async () => fireEvent.press(screen.getByLabelText('Báscula de bioimpedancia')));
+    await act(async () => fireEvent.press(screen.getByLabelText('Guardar medidas')));
+    expect(await screen.findByText(/Grasa: 18 %/)).toBeTruthy();
   });
 
   it('logs a body weight entry from the profile', async () => {

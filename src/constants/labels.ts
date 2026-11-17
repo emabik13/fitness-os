@@ -19,3 +19,19 @@ export const RECORD_TYPE_LABELS: Record<string, string> = {
   estimated_1rm: '1RM estimado',
   max_set_volume: 'Volumen por serie',
 };
+
+const kg = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1).replace('.', ','));
+
+/** Human text for a personal record. */
+export function formatRecord(type: string, value: number, weightKg: number | null, reps: number | null): string {
+  switch (type) {
+    case 'max_reps':
+      return `${value} repeticiones`;
+    case 'estimated_1rm':
+      return `${kg(value)} kg (estimado${weightKg && reps ? ` desde ${kg(weightKg)} kg × ${reps}` : ''})`;
+    case 'max_set_volume':
+      return weightKg && reps ? `${kg(weightKg)} kg × ${reps} = ${Math.round(value)} kg` : `${Math.round(value)} kg`;
+    default:
+      return weightKg && reps ? `${kg(weightKg)} kg × ${reps}` : `${kg(value)} kg`;
+  }
+}
