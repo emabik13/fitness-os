@@ -23,6 +23,25 @@ cp .env.example .env
 
 (El `.env` solo será necesario a partir de la Fase 10 — Supabase.)
 
+## Probar en iPhone con Expo Go (rápido, gratis)
+
+Mientras la app solo use módulos incluidos en Expo Go (válido hasta la Fase 3), puedes probarla así:
+
+1. Instala **Expo Go** desde la App Store en el iPhone.
+2. En tu ordenador (misma red Wi-Fi que el iPhone), dentro del proyecto:
+
+```bash
+npm install
+```
+
+```bash
+npm run start:go
+```
+
+3. Escanea el código QR con la **cámara** del iPhone y ábrelo en Expo Go.
+
+Si la red Wi-Fi bloquea la conexión entre dispositivos, usa `npx expo start --go --tunnel`.
+
 ## Ejecutar la app (development build)
 
 FITNESS OS usa dependencias nativas, así que se ejecuta con un **development build**, no con Expo Go.
