@@ -1,6 +1,6 @@
 # FITNESS OS — Arquitectura
 
-Documento vivo. Última revisión: Fase 1 (17-nov-2026).
+Documento vivo. Última revisión: Fases 2–9 (17-nov-2026).
 
 ## 1. Stack verificado (Fase 0)
 
@@ -56,8 +56,23 @@ src/
     sqlite/               Apertura de BD y bootstrap (usuario local)
     repositories/         Consultas por agregado
     DatabaseProvider.tsx  Contexto { db, userId, schemaVersion }
-  engine/                 (Fase 5+) workout-generator, progression, volume-calculator, recovery, recommendations
-  services/               (Fase 4/10) supabase, media (GLB), sync
+  catalog/                Contenido de la biblioteca (ejercicios, músculos) versionado (CATALOG_VERSION)
+  domain/                 Tipos y esquemas Zod del dominio (perfil, etiquetas)
+  engine/                 Lógica pura y testeada, sin React ni SQLite:
+    workout-generator/      generateRoutine (división, selección, volumen, tiempo, justificación)
+    progression/            doble progresión, tendencias, récords
+    strength/               1RM estimado
+    volume-calculator/      series efectivas por músculo
+    body/                   media móvil y tendencia de peso
+    nutrition/              objetivos (Mifflin-St Jeor, proteína, agua)
+    statistics/             agregaciones por ejercicio, buckets, rachas
+  services/
+    backup/                 exportar/importar/borrar datos (+ E/S de ficheros por plataforma)
+    media/                  manifiesto de recursos 3D (Zod, fuente/licencia obligatorias)
+    pwa/                    registro del service worker (solo web)
+  sync/                   regla de conflictos compartida (backup y futura sincronización)
+  stores/                 Zustand: sesión (onboarding) y temporizador de descanso
+  features/viewer3d/      visor GLB (three.js en web, alternativa ligera en nativo)
   hooks/                  useDbQuery (lectura con refresco al enfocar)
   theme/                  Tokens: colores, tipografía, espaciado, movimiento
   constants/ utils/ test/ __tests__/
@@ -117,6 +132,16 @@ Restricciones destacadas:
 - Pull: filas con `updated_at > sync_state.last_pulled_at` por tabla; se aplican si ganan la misma regla. Lápidas (`deleted_at`) se propagan.
 - Las tablas hijas en Postgres llevarán `user_id` desnormalizado para que las políticas **RLS** sean `user_id = auth.uid()` sin joins. Catálogo de ejercicios: lectura pública, escritura solo para `is_custom` del propietario.
 - Fotos de progreso: solo locales salvo consentimiento explícito; bucket privado con RLS.
+
+## 8.1 Motor de entrenamiento (resumen)
+
+1. División por días/experiencia (principiantes ≤ 4 días; máx. 6 días).
+2. Plantillas por tipo de sesión con huecos por patrón de movimiento y prioridad.
+3. Selección determinista de ejercicios: equipamiento (incl. requisitos como banco/rack), dificultad, limitaciones (etiquetas de carga articular), experiencia con básicos, preferencia por máquinas; rotación entre sesiones repetidas.
+4. Prescripción por objetivo/rol (principal, compuesto, aislamiento): rangos, descansos, RIR.
+5. Ajuste al tiempo de sesión (estimación: 5 min calentamiento + series × (40 s + descanso) + 1 min/ejercicio).
+6. Volumen: tope de 20 series directas/semana por músculo; prioridades +1 serie directa; subida hacia objetivos semanales liberando tiempo de accesorios ya cubiertos; aviso si el tiempo impide llegar al objetivo.
+7. Justificación textual y avisos guardados con la rutina.
 
 ## 9. Pruebas
 

@@ -108,6 +108,18 @@ npm test
 npx expo-doctor
 ```
 
+## Funcionalidades
+
+Onboarding y perfil · motor de rutinas con justificación · editor de rutinas · modo entrenamiento con autoguardado, descansos y sugerencias de progresión · biblioteca de 44 ejercicios con biomecánica · fichas de músculo · peso, medidas y % graso con método · nutrición y recuperación · estadísticas con filtros · copia de seguridad JSON. Estado detallado en `PROJECT_STATUS.md`.
+
+## Añadir modelos 3D
+
+Ver `assets/models-3d/README.md` y `src/services/media/manifest.ts`: cada recurso necesita URL, tamaño, SHA-256, fuente y licencia.
+
+## Supabase (Fase 10, pendiente de credenciales)
+
+El esquema con RLS está en `supabase/migrations/0001_init.sql`. Para activarlo hará falta un proyecto de Supabase y rellenar `.env` (ver `.env.example`).
+
 ## Estructura
 
 Ver `ARCHITECTURE.md §3`. Las rutas viven en `src/app/`; la lógica en `src/features`, `src/database` y `src/engine`.

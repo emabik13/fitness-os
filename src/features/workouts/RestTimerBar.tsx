@@ -33,14 +33,14 @@ export function RestTimerBar() {
   const pct = total > 0 ? Math.min(1, 1 - left / total) : 1;
   return (
     <View style={styles.root} accessibilityLiveRegion="polite" accessibilityLabel={done ? 'Descanso terminado' : `Descanso: ${formatClock(left)}`}>
+      <AppText variant="caption" color="textTertiary" numberOfLines={1}>
+        {done ? '¡A por la siguiente serie!' : `Descanso · ${label}`}
+      </AppText>
       <View style={styles.track}>
         <View style={[styles.fill, { width: `${pct * 100}%` }, done && styles.fillDone]} />
       </View>
       <View style={styles.row}>
         <View style={styles.flex}>
-          <AppText variant="caption" color="textTertiary" numberOfLines={1}>
-            {done ? '¡A por la siguiente serie!' : `Descanso · ${label}`}
-          </AppText>
           <AppText variant="metric" color={done ? 'accent' : 'textPrimary'}>
             {formatClock(left)}
           </AppText>

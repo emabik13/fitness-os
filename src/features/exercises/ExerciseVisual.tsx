@@ -2,7 +2,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
+import type { MuscleRole } from '@/catalog';
 import type { ExerciseMedia } from '@/database/repositories/exerciseRepository';
+import { ModelViewer } from '@/features/viewer3d/ModelViewer';
 import { colors, radii, spacing } from '@/theme';
 
 /**
@@ -10,7 +12,7 @@ import { colors, radii, spacing } from '@/theme';
  * asset (with source and license) exists; otherwise an explicit
  * "pending content" state. Never substitutes a static image for an animation.
  */
-export function ExerciseVisual({ media }: { media: ExerciseMedia[] }) {
+export function ExerciseVisual({ media, muscles }: { media: ExerciseMedia[]; muscles: { id: string; role: MuscleRole }[] }) {
   const animation = media.find((m) => m.kind === 'animation' && m.status === 'available');
   const model = media.find((m) => m.kind === 'anatomy_model' && m.status === 'available');
   const asset = animation ?? model;
@@ -31,12 +33,13 @@ export function ExerciseVisual({ media }: { media: ExerciseMedia[] }) {
   }
 
   return (
-    <View style={styles.pending}>
-      <AppText variant="bodyStrong">Recurso 3D disponible</AppText>
-      <AppText variant="caption" color="textTertiary">
-        Fuente: {asset.source} · Licencia: {asset.license}
-      </AppText>
-    </View>
+    <ModelViewer
+      uri={asset.uri!}
+      source={asset.source!}
+      license={asset.license!}
+      attribution={asset.attribution}
+      roles={new Map(muscles.map((m) => [m.id, m.role]))}
+    />
   );
 }
 

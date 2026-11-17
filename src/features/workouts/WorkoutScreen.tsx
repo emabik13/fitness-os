@@ -1,5 +1,4 @@
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { useKeepAwake } from 'expo-keep-awake';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -10,6 +9,7 @@ import { createWorkoutRepository, toSessions, type WorkoutExercise } from '@/dat
 import { adviseNextSession } from '@/engine/progression/doubleProgression';
 import { encodePick } from '@/features/exercises/pick';
 import { useDbQuery } from '@/hooks/useDbQuery';
+import { useKeepScreenOn } from '@/hooks/useKeepScreenOn';
 import { useRestTimer } from '@/stores/restTimerStore';
 import { spacing } from '@/theme';
 import { confirmAsync, notify } from '@/utils/dialog';
@@ -33,7 +33,7 @@ function ElapsedClock({ startedAt }: { startedAt: string }) {
 }
 
 export function WorkoutScreen() {
-  useKeepAwake();
+  useKeepScreenOn();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { db, userId } = useDatabase();
   const repo = createWorkoutRepository(db);

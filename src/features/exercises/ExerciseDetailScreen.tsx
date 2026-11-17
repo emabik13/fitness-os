@@ -48,7 +48,7 @@ export function ExerciseDetailScreen() {
         <Badge label={PATTERNS[data.pattern]} />
       </View>
 
-      <ExerciseVisual media={data.media} />
+      <ExerciseVisual media={data.media} muscles={data.muscles} />
 
       {data.description ? (
         <AppText variant="body" color="textSecondary">

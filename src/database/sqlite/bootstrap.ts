@@ -4,6 +4,8 @@ import { nowIso } from '@/utils/time';
 import { runMigrations } from '../migrations';
 import type { SqlExecutor } from '../types';
 
+import { MEDIA_MANIFEST, registerMedia } from '@/services/media/manifest';
+
 import { syncCatalog } from './syncCatalog';
 
 const LOCAL_USER_KEY = 'local_user_id';
@@ -42,5 +44,6 @@ export async function bootstrapDatabase(db: SqlExecutor): Promise<BootstrapResul
   const schemaVersion = await runMigrations(db);
   const userId = await ensureLocalUser(db);
   await syncCatalog(db);
+  if (MEDIA_MANIFEST.length) await registerMedia(db, MEDIA_MANIFEST);
   return { schemaVersion, userId };
 }
