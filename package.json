@@ -60,7 +60,8 @@
     "build:dev:ios": "eas build --profile development --platform ios",
     "build:preview": "eas build --profile preview --platform all",
     "build:web": "node scripts/build-web.js",
-    "build:web:pages": "EXPO_PUBLIC_BASE_URL=/fitness-os node scripts/build-web.js"
+    "build:web:pages": "EXPO_PUBLIC_BASE_URL=/fitness-os node scripts/build-web.js",
+    "verify": "npm run -s typecheck && expo lint --max-warnings 0 && jest --silent"
   },
   "private": true,
   "jest": {

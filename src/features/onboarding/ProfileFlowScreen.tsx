@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui';
 import { GOAL_LABELS } from '@/constants/labels';
 import { useDatabase } from '@/database/DatabaseProvider';
-import { createCatalogRepository } from '@/database/repositories/catalogRepository';
+import { createCatalogRepository, type MuscleGroup } from '@/database/repositories/catalogRepository';
 import { createDashboardRepository } from '@/database/repositories/dashboardRepository';
 import { createProfileRepository } from '@/database/repositories/profileRepository';
 import {
@@ -54,7 +54,6 @@ const GOAL_HINTS: Record<(typeof GOALS)[number], string> = {
 const STEP_TITLES = ['Tus datos', 'Objetivo', 'Disponibilidad', 'Gimnasio y salud'];
 
 export function ProfileFlowScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
-  const { db, userId } = useDatabase();
   const { data } = useDbQuery(async (d, uid) => {
     const [profile, weight, muscles] = await Promise.all([
       createProfileRepository(d).getProfile(uid),
@@ -63,20 +62,33 @@ export function ProfileFlowScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
     ]);
     return { profile, weight, muscles };
   });
+  if (!data) return <Screen title={mode === 'edit' ? 'Editar perfil' : 'Bienvenido'} back={mode === 'edit'}>{null}</Screen>;
+  return (
+    <ProfileForm
+      mode={mode}
+      initial={initialFormState(data.profile, data.weight?.weightKg)}
+      muscles={data.muscles}
+    />
+  );
+}
 
-  const [state, setState] = useState<ProfileFormState | null>(null);
+function ProfileForm({
+  mode,
+  initial,
+  muscles,
+}: {
+  mode: 'onboarding' | 'edit';
+  initial: ProfileFormState;
+  muscles: MuscleGroup[];
+}) {
+  const { db, userId } = useDatabase();
+  const [state, setState] = useState<ProfileFormState>(initial);
   const [step, setStep] = useState(0);
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
+  const errors = useMemo(() => fieldErrors(state), [state]);
 
-  useEffect(() => {
-    if (data && !state) setState(initialFormState(data.profile, data.weight?.weightKg));
-  }, [data, state]);
-
-  const errors = useMemo(() => (state ? fieldErrors(state) : {}), [state]);
-  if (!state || !data) return <Screen title={mode === 'edit' ? 'Editar perfil' : 'Bienvenido'} back={mode === 'edit'}>{null}</Screen>;
-
-  const set = <K extends keyof ProfileFormState>(k: K, v: ProfileFormState[K]) => setState((s) => (s ? { ...s, [k]: v } : s));
+  const set = <K extends keyof ProfileFormState>(k: K, v: ProfileFormState[K]) => setState((s) => ({ ...s, [k]: v }));
   const toggleIn = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const stepHasErrors = STEP_FIELDS[step]!.some((f) => errors[f]);
   const err = (f: keyof typeof errors) => (showErrors ? errors[f] : null);
@@ -206,7 +218,7 @@ export function ProfileFlowScreen({ mode }: { mode: 'onboarding' | 'edit' }) {
           </View>
           <FormSection title="Grupos musculares prioritarios" hint="Hasta 3. Recibirán algo más de volumen semanal.">
             <ChipGroup
-              options={data.muscles.map((m) => ({ value: m.id, label: m.nameEs }))}
+              options={muscles.map((m) => ({ value: m.id, label: m.nameEs }))}
               selected={state.priorityMuscles}
               onToggle={(v) => set('priorityMuscles', toggleIn(state.priorityMuscles, v))}
             />
