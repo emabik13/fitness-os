@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { HBar } from '@/components/charts/HBar';
 import { Sparkline } from '@/components/charts/Sparkline';
 import { WeekStrip } from '@/components/charts/WeekStrip';
-import { AppText, Badge, Card, EmptyState, PhaseNotice, Screen, SectionHeader, StatTile } from '@/components/ui';
+import { AppText, Badge, Card, EmptyState, Screen, SectionHeader, StatTile } from '@/components/ui';
 import { goalLabel, RECORD_TYPE_LABELS } from '@/constants/labels';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { spacing } from '@/theme';
@@ -25,14 +25,6 @@ export function DashboardScreen() {
     >
       {error ? (
         <EmptyState icon="warning-outline" title="Error al cargar" description={error.message} />
-      ) : null}
-
-      {data && !data.profile?.onboardingCompleted ? (
-        <PhaseNotice
-          phase={2}
-          title="Configura tu perfil"
-          description="El onboarding (edad, altura, experiencia, días disponibles y objetivo) se implementa en la siguiente fase."
-        />
       ) : null}
 
       {/* Today */}

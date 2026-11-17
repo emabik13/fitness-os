@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -5,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, gutter, spacing } from '@/theme';
 
 import { AppText } from './AppText';
+import { IconButton } from './IconButton';
 
 interface ScreenProps {
   title?: string;
@@ -16,6 +18,15 @@ interface ScreenProps {
   refreshing?: boolean;
   onRefresh?: () => void;
   contentStyle?: ViewStyle;
+  /** Shows a back button (stack screens). */
+  back?: boolean;
+  /** Content pinned below the scroll view (e.g. primary action). */
+  footer?: ReactNode;
+}
+
+export function goBack() {
+  if (router.canGoBack()) router.back();
+  else router.replace('/');
 }
 
 /**
@@ -31,8 +42,16 @@ export function Screen({
   refreshing,
   onRefresh,
   contentStyle,
+  back,
+  footer,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
+
+  const backRow = back ? (
+    <View style={styles.backRow}>
+      <IconButton icon="chevron-back" onPress={goBack} accessibilityLabel="Volver" variant="plain" />
+    </View>
+  ) : null;
 
   const header = title ? (
     <View style={styles.header}>
@@ -51,20 +70,28 @@ export function Screen({
   ) : null;
 
   const padding = {
-    paddingTop: insets.top + spacing.md,
-    paddingBottom: spacing.huge * 2,
+    paddingTop: insets.top + (back ? spacing.xs : spacing.md),
+    paddingBottom: footer ? spacing.xxl : spacing.huge * 2,
   };
+  const footerNode = footer ? (
+    <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>{footer}</View>
+  ) : null;
 
   if (!scroll) {
     return (
-      <View style={[styles.root, padding, styles.content, contentStyle]}>
-        {header}
-        {children}
+      <View style={styles.root}>
+        <View style={[styles.root, padding, styles.content, contentStyle]}>
+          {backRow}
+          {header}
+          {children}
+        </View>
+        {footerNode}
       </View>
     );
   }
 
   return (
+    <View style={styles.root}>
     <ScrollView
       style={styles.root}
       contentContainerStyle={[padding, styles.content, contentStyle]}
@@ -83,9 +110,12 @@ export function Screen({
         ) : undefined
       }
     >
+      {backRow}
       {header}
       {children}
     </ScrollView>
+    {footerNode}
+    </View>
   );
 }
 
@@ -100,4 +130,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   headerText: { flex: 1, gap: spacing.xxs },
+  backRow: { marginLeft: -spacing.md, marginBottom: -spacing.md },
+  footer: {
+    paddingHorizontal: gutter,
+    paddingTop: spacing.md,
+    backgroundColor: colors.background,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
 });

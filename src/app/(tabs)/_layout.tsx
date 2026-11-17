@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useSessionStore } from '@/stores/sessionStore';
 import { colors, fonts } from '@/theme';
 import { haptics } from '@/utils/haptics';
 
@@ -20,6 +21,10 @@ const TABS: { name: string; title: string; icon: IconName; iconActive: IconName 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const bottom = Math.max(insets.bottom, Platform.OS === 'android' ? 8 : 0);
+  const onboarded = useSessionStore((s) => s.onboarded);
+
+  // First launch: configure the profile before anything else.
+  if (onboarded === false) return <Redirect href="/onboarding" />;
 
   return (
     <Tabs

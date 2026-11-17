@@ -1,5 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
+import { useSessionStore } from '@/stores/sessionStore';
+
+import { createDashboardRepository } from './repositories/dashboardRepository';
 import { openExecutor } from './sqlite/client';
 import { bootstrapDatabase } from './sqlite/bootstrap';
 import type { SqlExecutor } from './types';
@@ -37,6 +40,8 @@ export function DatabaseProvider({ children, fallback, renderError, onReady }: D
       try {
         const db = await openExecutor();
         const { schemaVersion, userId } = await bootstrapDatabase(db);
+        const profile = await createDashboardRepository(db).getProfileSummary(userId);
+        useSessionStore.getState().setOnboarded(!!profile?.onboardingCompleted);
         if (!cancelled) setState({ status: 'ready', value: { db, userId, schemaVersion } });
       } catch (e) {
         if (!cancelled) setState({ status: 'error', error: e instanceof Error ? e : new Error(String(e)) });

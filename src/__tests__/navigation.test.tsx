@@ -3,8 +3,11 @@ import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testi
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseContextProvider } from '@/database/DatabaseProvider';
+import { createProfileRepository } from '@/database/repositories/profileRepository';
 import { bootstrapDatabase } from '@/database/sqlite/bootstrap';
+import { EQUIPMENT } from '@/domain/profile';
 import type { SqlExecutor } from '@/database/types';
+import { useSessionStore } from '@/stores/sessionStore';
 import { createTestDb } from '@/test/nodeSqliteExecutor';
 
 let ctx: { db: SqlExecutor; userId: string; schemaVersion: number };
@@ -13,7 +16,17 @@ beforeEach(async () => {
   const db = createTestDb();
   const { userId, schemaVersion } = await bootstrapDatabase(db);
   ctx = { db, userId, schemaVersion };
+  useSessionStore.getState().setOnboarded(false);
 });
+
+async function seedProfile() {
+  await createProfileRepository(ctx.db).saveProfile(ctx.userId, {
+    ageYears: 30, sex: null, heightCm: 178, weightKg: 80, targetWeightKg: null, goal: 'recomposition',
+    experience: 'intermediate', daysPerWeek: 4, sessionMinutes: 60, priorityMuscles: [], limitations: [],
+    liftExperience: {}, equipment: [...EQUIPMENT], preferences: { effortScale: 'rir', preferMachines: false, includeCore: true },
+  });
+  useSessionStore.getState().setOnboarded(true);
+}
 
 /** Real (tabs) routes and screens; only the root layout is swapped to inject a real in-memory SQLite. */
 function TestRootLayout() {
@@ -30,7 +43,33 @@ async function renderApp(initialUrl = '/') {
   await renderRouter({ appDir: './src/app', overrides: { _layout: TestRootLayout } }, { initialUrl });
 }
 
+describe('onboarding', () => {
+  it('redirects a new user to onboarding and saves the profile', async () => {
+    await renderApp();
+    await waitFor(() => expect(screen).toHavePathname('/onboarding'));
+    // Step 1 with invalid data shows errors and does not advance.
+    await act(async () => fireEvent.press(screen.getByLabelText('Continuar')));
+    expect(await screen.findByText('Revisa los campos marcados')).toBeTruthy();
+    await act(async () => fireEvent.changeText(screen.getByLabelText('Edad'), '31'));
+    await act(async () => fireEvent.changeText(screen.getByLabelText('Altura'), '178'));
+    await act(async () => fireEvent.changeText(screen.getByLabelText('Peso actual'), '82,4'));
+    for (const title of ['Objetivo', 'Disponibilidad', 'Gimnasio y salud']) {
+      await act(async () => fireEvent.press(screen.getByLabelText('Continuar')));
+      expect(await screen.findByText(title)).toBeTruthy();
+    }
+    await act(async () => fireEvent.press(screen.getByLabelText('Empezar')));
+    await waitFor(() => expect(screen).toHavePathname('/'));
+    const p = await createProfileRepository(ctx.db).getProfile(ctx.userId);
+    expect(p?.goal).toBe('recomposition');
+    expect(p?.ageYears).toBe(31);
+    const w = await ctx.db.getFirstAsync<{ weight_kg: number }>('SELECT weight_kg FROM body_weight_entries');
+    expect(w?.weight_kg).toBe(82.4);
+  });
+});
+
 describe('navigation', () => {
+  beforeEach(seedProfile);
+
   it('opens on Inicio with honest empty states from the database', async () => {
     await renderApp();
     expect(screen).toHavePathname('/');
@@ -81,9 +120,17 @@ describe('navigation', () => {
     expect(await screen.findByText('45')).toBeTruthy();
   });
 
-  it('profile shows schema version and fixed units', async () => {
+  it('profile shows saved data and fixed units', async () => {
     await renderApp('/perfil');
     expect(await screen.findByText(`Esquema v${ctx.schemaVersion}`)).toBeTruthy();
     expect(screen.getByText('Kilogramos (kg)')).toBeTruthy();
+    expect(screen.getByText('4 días · 60 min')).toBeTruthy();
+  });
+
+  it('logs a body weight entry from the profile', async () => {
+    await renderApp('/registro/peso');
+    await act(async () => fireEvent.changeText(await screen.findByLabelText('Peso'), '79,6'));
+    await act(async () => fireEvent.press(screen.getByLabelText('Guardar pesaje')));
+    expect(await screen.findByText('79,6 kg')).toBeTruthy();
   });
 });

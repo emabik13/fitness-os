@@ -1,6 +1,7 @@
 import type { SqlExecutor } from '../types';
 
 import { migration001 } from './001_initial_schema';
+import { migration002 } from './002_routine_schedule';
 
 export interface Migration {
   version: number;
@@ -9,7 +10,7 @@ export interface Migration {
 }
 
 /** Ordered list of migrations. Append only — never edit a shipped migration. */
-export const migrations: readonly Migration[] = [migration001];
+export const migrations: readonly Migration[] = [migration001, migration002];
 
 export const LATEST_SCHEMA_VERSION = migrations[migrations.length - 1]?.version ?? 0;
 
