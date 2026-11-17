@@ -1,7 +1,7 @@
 # PROJECT_STATUS — FITNESS OS
 
 **Fase actual:** Fase 1 completada + versión web instalable (PWA) → siguiente: **Fase 2 (Perfil y onboarding)**
-**App publicada en:** https://emabik13.github.io/fitness-os/ (requiere activar GitHub Pages, ver abajo)
+**App publicada en:** https://emabik13.github.io/fitness-os/ ✅ (despliegue automático en cada push a `main`)
 **Última actualización:** 17-nov-2026
 
 ## Fase 0 — Auditoría y arquitectura ✅
@@ -30,6 +30,7 @@
 - SQLite en web con sql.js + IndexedDB, persistencia tras cada escritura confirmada; probado con recarga simulada y rollback (3 tests).
 - PWA: manifiesto, iconos propios, metadatos iOS (pantalla completa, barra de estado), service worker con soporte offline.
 - Despliegue automático a GitHub Pages en cada push a `main` (con typecheck, lint y tests como requisito).
+- Publicada y verificada en el sitio real (GitHub Pages): carga, pestañas, persistencia, service worker y modo sin conexión.
 - Verificado en Chromium emulando iPhone 13, servido bajo `/fitness-os/` como en GitHub Pages: carga, navegación, deep links, persistencia en IndexedDB, service worker activo y **carga sin conexión**.
 
 ## Pendiente
@@ -40,7 +41,6 @@
 - Fases 5–11 según plan.
 
 ## Errores conocidos / limitaciones
-- **GitHub Pages aún no está activo**: el repositorio es privado y GitHub Pages gratis solo publica repositorios públicos (o requiere GitHub Pro). Ver "Próximos pasos".
 - No probado todavía en Safari real de iPhone (solo motor Chromium con emulación). Primera verificación: abrir la URL en el iPhone 17.
 - Los datos de la PWA viven solo en el dispositivo hasta implementar exportación/copia de seguridad (añadido como pendiente prioritario).
 - La app **no se ha ejecutado aún en un dispositivo o emulador real**: este entorno no tiene Android SDK/Xcode. Se validó compilando los bundles nativos y con una vista web de QA. Primer paso recomendado: `eas build --profile development`.
@@ -49,6 +49,5 @@
 - Se eliminó el `LICENSE` de la plantilla (atribuía el copyright a Expo). La licencia del producto está por decidir.
 
 ## Próximos pasos
-0. Activar la publicación: hacer público el repositorio y en Settings → Pages → Source elegir **GitHub Actions**.
 1. Fase 2: flujo de onboarding multipaso con validación Zod, guardado en `user_profiles`/`user_equipment`/`body_weight_entries`, edición desde Perfil.
 2. Generar el primer development build con EAS y probar en un Android y un iPhone reales.
