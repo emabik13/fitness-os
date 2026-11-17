@@ -94,8 +94,9 @@ export function TrainScreen() {
           </AppText>
         </Card>
       ))}
+      <Button label="Explorar rutinas recomendadas" icon="albums-outline" onPress={() => router.push('/rutinas/explorar')} />
       <View style={styles.row}>
-        <Button label="Generar rutina" icon="sparkles-outline" size="md" onPress={() => router.push('/rutinas/generar')} style={styles.flex} />
+        <Button label="Generar rutina" icon="sparkles-outline" size="md" variant="secondary" onPress={() => router.push('/rutinas/generar')} style={styles.flex} />
         <Button
           label="Crear vacía"
           icon="add"

@@ -220,6 +220,11 @@ function ExerciseItem({
           <AppText variant="footnote" color="textSecondary">
             {prescriptionText(ex)}
           </AppText>
+          {ex.intensityNote ? (
+            <AppText variant="caption" color="info">
+              {ex.intensityNote}
+            </AppText>
+          ) : null}
         </View>
         <Ionicons name={open ? 'chevron-up' : 'create-outline'} size={18} color={colors.textTertiary} />
       </PressableScale>

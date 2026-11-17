@@ -1,3 +1,4 @@
+import { EXTRA_EXERCISES } from './exercises.extra';
 import { ARM_LEG_CORE_EXERCISES } from './exercises.lower';
 import { UPPER_EXERCISES } from './exercises.upper';
 import { CATALOG_MUSCLES } from './muscles';
@@ -6,10 +7,10 @@ import type { CatalogExercise } from './types';
 export * from './types';
 export { CATALOG_MUSCLES };
 
-export const CATALOG_EXERCISES: CatalogExercise[] = [...UPPER_EXERCISES, ...ARM_LEG_CORE_EXERCISES];
+export const CATALOG_EXERCISES: CatalogExercise[] = [...UPPER_EXERCISES, ...ARM_LEG_CORE_EXERCISES, ...EXTRA_EXERCISES];
 
 /** Bump when catalog content changes so devices re-sync it. */
-export const CATALOG_VERSION = 1;
+export const CATALOG_VERSION = 2;
 
 /** Stable, deterministic id for built-in exercises (same on every device). */
 export const catalogId = (slug: string) => `cat-${slug}`;

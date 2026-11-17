@@ -143,6 +143,14 @@ Restricciones destacadas:
 6. Volumen: tope de 20 series directas/semana por músculo; prioridades +1 serie directa; subida hacia objetivos semanales liberando tiempo de accesorios ya cubiertos; aviso si el tiempo impide llegar al objetivo.
 7. Justificación textual y avisos guardados con la rutina.
 
+## 8.2 Recomendador y análisis
+
+- `engine/workout-generator/splits.ts` (divisiones, plantillas, calendario, frecuencia) y `styles.ts` (estilos: afinidad por objetivo/experiencia, fatiga, sesgos de selección, prescripción, técnicas). `generateRoutine(input, catalog, { style, split, days })`.
+- `engine/recommendations/recommendRoutines.ts`: enumera combinaciones válidas (días ±1), genera, puntúa (`scoreRoutine`, 8 criterios con pesos que suman 1 y se adaptan) y deduplica.
+- `engine/recommendations/adherence.ts`: P(≥ d sesiones/semana) con Beta(1,1) a priori; media (1+aciertos)/(2+n) e intervalo creíble 90 % (CDF beta por fracción continua).
+- `engine/analytics/insights.ts`: diagnósticos con umbrales documentados; `features/recommendations/loadContext.ts` reúne perfil, historial y recuperación.
+- Las puntuaciones de afinidad de los estilos son criterios de programación explícitos (no datos empíricos); la única probabilidad mostrada como tal es la de cumplimiento, calculada con datos del usuario.
+
 ## 9. Pruebas
 
 - `npm test` → proyecto `logic` (migraciones, repositorios, utilidades, geometría) y `app` (navegación real de las 5 pestañas con `expo-router/testing-library` sobre SQLite en memoria).

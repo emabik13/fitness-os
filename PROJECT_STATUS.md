@@ -2,7 +2,7 @@
 
 **Fase actual:** Fases 0–9 completadas, Fase 4 con el visor listo pero **sin modelos 3D** (falta contenido con licencia). Fase 10 preparada (esquema Supabase + RLS validados), **pendiente de credenciales**. Fase 11 en curso.
 **App publicada:** https://emabik13.github.io/fitness-os/ (PWA instalable en iPhone; despliegue automático en cada push a `main`).
-**Última actualización:** 17-nov-2026
+**Última actualización:** 17-nov-2026 (recomendador)
 
 ## Estado por fase
 
@@ -20,6 +20,14 @@
 | 9 Estadísticas | ✅ | Filtros 7D–Todo; por ejercicio, músculo, entrenamiento y composición corporal. |
 | 10 Sincronización | 🟡 | `supabase/migrations/0001_init.sql` (tablas, índices, RLS por usuario, trigger de conflictos) validado con PGlite. Regla de conflictos compartida (`src/sync/conflict.ts`). Copia de seguridad JSON exportar/importar sin duplicados. **Falta**: proyecto Supabase, credenciales, cliente de auth y motor push/pull. |
 | 11 Validación | 🟡 | 100+ tests, E2E en navegador (iPhone emulado). Builds nativos no generados (requieren cuenta Expo; iOS en dispositivo requiere Apple Developer Program). |
+
+## Recomendador y análisis (ampliación) ✅
+- Biblioteca ampliada a **66 ejercicios** (catálogo v2): goblet, sentadilla frontal, hip thrust en máquina, patada en polea, hiperextensiones, curl nórdico, step-up, zancada inversa, press en máquina, elevaciones frontales, press cerrado, extensión con mancuerna, curl Scott, dominadas supinas, remo T, pullover, contractora, Pallof, paseo del granjero, flexiones, remo invertido, gemelos en multipower.
+- **9 estilos** (Equilibrado, Fuerza, Powerbuilding, Exprés con superseries, Circuitos, Máquinas, Peso libre, Cuidado articular, Especialización) × **7 divisiones** (Full Body, Full Body alta frecuencia, Torso/Pierna, PPL, Torso/Pierna+PPL, Torso/Pierna+Full, por grupos musculares). Las 153 combinaciones válidas se prueban contra tiempo de sesión, tope de volumen y recuperación entre días.
+- **Explorador de rutinas** (`/rutinas/explorar`): genera todas las combinaciones para tus días ±1, las puntúa con 8 criterios ponderados y explicados (objetivo, volumen, frecuencia, disponibilidad, probabilidad de cumplimiento, experiencia, recuperación, limitaciones; pesos adaptativos si hay mala recuperación o limitaciones), elimina duplicados y permite filtrar y ordenar.
+- **Probabilidad de cumplimiento real**: modelo Beta-Binomial sobre tus semanas completas desde el primer entrenamiento, con intervalo creíble del 90 %; sin historial suficiente se muestra como suposición.
+- **Análisis** (`/analisis`): constancia, curva de probabilidad por nº de sesiones, equilibrio empuje/tracción y cuádriceps/isquios, volumen bajo o excesivo, ejercicios estancados o en retroceso con variantes sugeridas, progresos y recuperación.
+- Técnicas (superseries, circuitos por bloques, drop sets) guardadas en la rutina y visibles durante el entrenamiento.
 
 ## Verificación
 - `npm run verify` → typecheck (app + tests) ✔, lint sin avisos ✔, Jest ✔ (lógica con SQLite real vía `node:sqlite` y `sql.js`; UI/navegación con expo-router testing-library).

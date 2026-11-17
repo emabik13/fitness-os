@@ -204,6 +204,27 @@ describe('navigation', () => {
     expect(await screen.findByText(/Grasa: 18 %/)).toBeTruthy();
   });
 
+  it('routine explorer: many ranked options, filters and saving a proposal', async () => {
+    await renderApp('/rutinas/explorar');
+    expect(await screen.findByText(/rutinas evaluadas/, {}, { timeout: 10000 })).toBeTruthy();
+    expect(screen.getAllByLabelText(/^Opción \d+:/).length).toBeGreaterThanOrEqual(10);
+    await act(async () => fireEvent.press(screen.getByLabelText('Exprés')));
+    const options = screen.getAllByLabelText(/^Opción \d+:/);
+    expect(options.every((o) => /Exprés/.test(o.props.accessibilityLabel))).toBe(true);
+    await act(async () => fireEvent.press(options[0]!));
+    expect(await screen.findByText('Compatibilidad con tu perfil')).toBeTruthy();
+    expect(screen.getAllByText(/Superserie/).length).toBeGreaterThan(0);
+    await act(async () => fireEvent.press(screen.getByLabelText('Guardar y activar')));
+    expect(await screen.findByText('Rutina activa')).toBeTruthy();
+  });
+
+  it('analysis screen with diagnosis and adherence probabilities', async () => {
+    await renderApp('/analisis');
+    expect(await screen.findByText('Diagnóstico')).toBeTruthy();
+    expect(screen.getByText('Aún hay pocos datos')).toBeTruthy();
+    expect(screen.getByText(/≥ 4 sesiones\/semana \(tu plan\)/)).toBeTruthy();
+  });
+
   it('logs a body weight entry from the profile', async () => {
     await renderApp('/registro/peso');
     await act(async () => fireEvent.changeText(await screen.findByLabelText('Peso'), '79,6'));

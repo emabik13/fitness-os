@@ -88,6 +88,7 @@ export function DashboardScreen() {
                 Genera una rutina adaptada a tu perfil y la sesión del día aparecerá aquí.
               </AppText>
               <Button label="Generar mi rutina" icon="sparkles-outline" onPress={() => router.push('/rutinas/generar')} style={styles.mt} />
+              <Button label="Ver rutinas recomendadas" variant="ghost" size="md" onPress={() => router.push('/rutinas/explorar')} />
             </>
           )}
         </Card>

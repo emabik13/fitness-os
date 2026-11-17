@@ -30,6 +30,7 @@ export interface RoutineExerciseRow {
   restSeconds: number;
   targetRir: number | null;
   notes: string | null;
+  intensityNote: string | null;
 }
 
 export interface RoutineDayRow {
@@ -86,7 +87,7 @@ export function createRoutineRepository(db: SqlExecutor) {
         `SELECT re.id, re.routine_day_id AS routineDayId, re.exercise_id AS exerciseId, e.name_es AS name,
                 mg.name_es AS primaryMuscleName, e.equipment, e.movement_type AS movementType, re.position,
                 re.sets, re.rep_min AS repMin, re.rep_max AS repMax, re.rest_seconds AS restSeconds,
-                re.target_rir AS targetRir, re.notes
+                re.target_rir AS targetRir, re.notes, re.intensity_note AS intensityNote
            FROM routine_exercises re
            JOIN routine_days d ON d.id = re.routine_day_id
            JOIN exercises e ON e.id = re.exercise_id
@@ -129,6 +130,7 @@ export function createRoutineRepository(db: SqlExecutor) {
             await insertRow(db, 'routine_exercises', {
               routine_day_id: dayId, exercise_id: catalogId(e.slug), position: p, sets: e.sets,
               rep_min: e.repMin, rep_max: e.repMax, rest_seconds: e.restSeconds, target_rir: e.targetRir,
+              intensity_note: e.note ?? null,
             });
           }
         }

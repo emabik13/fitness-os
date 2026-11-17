@@ -65,6 +65,14 @@ export function ProgressScreen() {
   return (
     <Screen title="Progreso" refreshing={refreshing} onRefresh={refresh}>
       <SegmentedControl options={RANGE_OPTIONS} value={range} onChange={setRange} accessibilityLabel="Periodo" />
+      <ListGroup>
+        <ListRow
+          icon="analytics-outline"
+          title="Análisis de tu entrenamiento"
+          subtitle="Constancia, equilibrio muscular, estancamientos y probabilidad de cumplir tu plan"
+          onPress={() => router.push('/analisis')}
+        />
+      </ListGroup>
 
       <SectionHeader title="Entrenamiento" />
       <View style={styles.row}>

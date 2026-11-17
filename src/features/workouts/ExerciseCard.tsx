@@ -90,6 +90,14 @@ export function ExerciseCard({ ex, previous, advice, effortScale, first, last, h
         </View>
       ) : null}
 
+      {ex.intensityNote ? (
+        <View style={styles.technique}>
+          <AppText variant="caption" color="info">
+            {ex.intensityNote}
+          </AppText>
+        </View>
+      ) : null}
+
       {previous ? (
         <AppText variant="caption" color="textTertiary">
           Última vez: {previous.sets.map((s) => `${s.weightKg !== null ? formatKg(s.weightKg) : '—'}×${s.reps ?? '—'}`).join(' · ')}
@@ -166,4 +174,5 @@ const styles = StyleSheet.create({
   advice: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderRadius: radii.md, backgroundColor: colors.surfaceRaised },
   adviceUp: { backgroundColor: colors.accentMuted },
   footer: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  technique: { padding: spacing.sm, borderRadius: radii.sm, backgroundColor: colors.infoMuted },
 });

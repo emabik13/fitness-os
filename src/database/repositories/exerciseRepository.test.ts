@@ -1,4 +1,4 @@
-import { catalogId } from '@/catalog';
+import { CATALOG_EXERCISES, catalogId } from '@/catalog';
 import { bootstrapDatabase } from '@/database/sqlite/bootstrap';
 import { createTestDb } from '@/test/nodeSqliteExecutor';
 
@@ -11,7 +11,9 @@ describe('exercise repository', () => {
     const repo = createExerciseRepository(db);
     const chest = await repo.list({ muscleId: 'pectorals' });
     expect(chest.length).toBeGreaterThanOrEqual(5);
-    expect(chest.every((e) => e.primaryMuscleId === 'pectorals' || e.slug === 'fondos-paralelas')).toBe(true);
+    const isChestAgonist = (slug: string) =>
+      CATALOG_EXERCISES.find((x) => x.slug === slug)!.muscles.some((m) => m.id === 'pectorals' && m.role === 'agonist');
+    expect(chest.every((e) => isChestAgonist(e.slug))).toBe(true);
     const cables = await repo.list({ equipment: 'cable', difficulty: 'beginner' });
     expect(cables.every((e) => e.equipment === 'cable' && e.difficulty === 'beginner')).toBe(true);
     expect((await repo.list({ pattern: 'hinge' })).map((e) => e.slug)).toContain('peso-muerto-rumano');

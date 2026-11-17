@@ -32,6 +32,8 @@ export interface WorkoutExercise {
   repMax: number | null;
   targetRir: number | null;
   notes: string | null;
+  /** Technique from the routine (superset, drop set, circuit…). */
+  intensityNote: string | null;
   sets: WorkoutSet[];
 }
 
@@ -180,9 +182,11 @@ export function createWorkoutRepository(db: SqlExecutor) {
         `SELECT we.id, we.exercise_id AS exerciseId, e.name_es AS name, mg.name_es AS primaryMuscleName, e.equipment,
                 e.movement_type AS movementType, we.position,
                 COALESCE(we.rest_seconds, CASE e.movement_type WHEN 'compound' THEN ${DEFAULT_REST.compound} ELSE ${DEFAULT_REST.isolation} END) AS restSeconds,
-                we.rep_min AS repMin, we.rep_max AS repMax, we.target_rir AS targetRir, we.notes
+                we.rep_min AS repMin, we.rep_max AS repMax, we.target_rir AS targetRir, we.notes,
+                re.intensity_note AS intensityNote
            FROM workout_exercises we
            JOIN exercises e ON e.id = we.exercise_id
+           LEFT JOIN routine_exercises re ON re.id = we.routine_exercise_id
            JOIN muscle_groups mg ON mg.id = e.primary_muscle_group_id
           WHERE we.workout_id = ? AND we.deleted_at IS NULL ORDER BY we.position`,
         [workoutId],

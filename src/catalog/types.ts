@@ -29,6 +29,10 @@ export const PATTERNS = {
   core_anti_extension: 'Core antiextensión',
   core_flexion: 'Flexión de tronco',
   wrist_flexion: 'Flexión de muñeca',
+  shoulder_flexion: 'Elevación frontal',
+  shoulder_extension: 'Extensión de hombro',
+  core_anti_rotation: 'Core antirrotación',
+  carry: 'Acarreo',
 } as const;
 export type Pattern = keyof typeof PATTERNS;
 
