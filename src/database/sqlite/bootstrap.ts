@@ -4,6 +4,8 @@ import { nowIso } from '@/utils/time';
 import { runMigrations } from '../migrations';
 import type { SqlExecutor } from '../types';
 
+import { syncCatalog } from './syncCatalog';
+
 const LOCAL_USER_KEY = 'local_user_id';
 
 /**
@@ -39,5 +41,6 @@ export interface BootstrapResult {
 export async function bootstrapDatabase(db: SqlExecutor): Promise<BootstrapResult> {
   const schemaVersion = await runMigrations(db);
   const userId = await ensureLocalUser(db);
+  await syncCatalog(db);
   return { schemaVersion, userId };
 }

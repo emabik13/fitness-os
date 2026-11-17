@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
+import { Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseContextProvider } from '@/database/DatabaseProvider';
@@ -80,7 +81,7 @@ describe('navigation', () => {
 
   it.each([
     ['Entrenar', '/entrenar', 'Mis rutinas'],
-    ['Anatomía', '/anatomia', 'Visor anatómico 3D'],
+    ['Anatomía', '/anatomia', 'Biblioteca de ejercicios'],
     ['Progreso', '/progreso', 'Peso corporal'],
     ['Perfil', '/perfil', 'Datos y privacidad'],
   ])('tab %s navigates to %s', async (tab, path, marker) => {
@@ -125,6 +126,47 @@ describe('navigation', () => {
     expect(await screen.findByText(`Esquema v${ctx.schemaVersion}`)).toBeTruthy();
     expect(screen.getByText('Kilogramos (kg)')).toBeTruthy();
     expect(screen.getByText('4 días · 60 min')).toBeTruthy();
+  });
+
+  it('library search and exercise detail with technique', async () => {
+    await renderApp('/ejercicios');
+    await act(async () => fireEvent.changeText(await screen.findByLabelText('Buscar ejercicio'), 'jalon'));
+    await act(async () => fireEvent.press(await screen.findByLabelText('Jalón al pecho')));
+    expect(await screen.findByText('Cómo se hace')).toBeTruthy();
+    expect(screen.getByText('Animación 3D pendiente de contenido')).toBeTruthy();
+    expect(screen.getByText('Biomecánica')).toBeTruthy();
+  });
+
+  it('free workout: add exercise from library, complete a set, rest timer, finish and summary', async () => {
+    await renderApp('/entrenar');
+    await act(async () => fireEvent.press(await screen.findByLabelText('Entrenamiento libre')));
+    await waitFor(() => expect(screen).toHavePathname(expect.stringMatching(/^\/entrenamiento\//)));
+    await act(async () => fireEvent.press(await screen.findByLabelText('Añadir ejercicio')));
+    await act(async () => fireEvent.press(await screen.findByLabelText('Press de banca con barra')));
+    expect(await screen.findByText('Press de banca con barra')).toBeTruthy();
+    await act(async () => fireEvent.changeText(screen.getByLabelText('Peso serie 1'), '40'));
+    await act(async () => fireEvent.changeText(screen.getByLabelText('Repeticiones serie 1'), '12'));
+    await act(async () => fireEvent.press(screen.getByLabelText('Completar serie 1')));
+    expect(await screen.findByText(/Descanso · Press de banca/)).toBeTruthy();
+    await act(async () => fireEvent.press(screen.getByLabelText('Saltar')));
+    // The user confirms that the 2 incomplete sets will be discarded.
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => buttons?.[1]?.onPress?.());
+    await act(async () => fireEvent.press(screen.getByLabelText('Finalizar')));
+    expect(alert).toHaveBeenCalledWith('Finalizar entrenamiento', expect.stringMatching(/2 series sin completar/), expect.anything());
+    alert.mockRestore();
+    await waitFor(() => expect(screen).toHavePathname(expect.stringMatching(/^\/entrenamiento\/resumen\//)));
+    expect(await screen.findByText('Volumen total')).toBeTruthy();
+    expect(screen.getByText('480')).toBeTruthy();
+    const n = await ctx.db.getFirstAsync<{ n: number }>("SELECT COUNT(*) AS n FROM workout_sets WHERE deleted_at IS NULL AND is_completed = 1");
+    expect(n?.n).toBe(1);
+  });
+
+  it('generates and saves a routine from the profile', async () => {
+    await renderApp('/rutinas/generar');
+    expect(await screen.findByText('Por qué esta rutina')).toBeTruthy();
+    await act(async () => fireEvent.press(screen.getByLabelText('Guardar y activar')));
+    await waitFor(() => expect(screen).toHavePathname(expect.stringMatching(/^\/rutinas\/[^g]/)));
+    expect(await screen.findByText('Rutina activa')).toBeTruthy();
   });
 
   it('logs a body weight entry from the profile', async () => {

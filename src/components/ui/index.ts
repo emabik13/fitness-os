@@ -17,3 +17,4 @@ export { Stepper } from './Stepper';
 export { TextField } from './TextField';
 export { goBack } from './Screen';
 export { DayPicker } from './DayPicker';
+export { HScrollChips } from './HScrollChips';

@@ -1,3 +1,5 @@
+import { startOfWeek, toLocalDateKey } from '@/utils/time';
+
 import type { SqlExecutor } from '../types';
 
 export interface TrainingTotals {
@@ -13,8 +15,45 @@ export interface WeightPoint {
   weightKg: number;
 }
 
+export interface WeeklyMuscleSets {
+  weekStart: string; // local YYYY-MM-DD (Monday)
+  direct: number;
+  effective: number;
+}
+
 export function createStatsRepository(db: SqlExecutor) {
   return {
+    /** Completed working sets for a muscle bucketed by week (oldest first, `weeks` buckets ending this week). */
+    async muscleWeeklySets(userId: string, muscleId: string, weeks = 8, now = new Date()): Promise<WeeklyMuscleSets[]> {
+      const thisWeek = startOfWeek(now);
+      const first = new Date(thisWeek);
+      first.setDate(first.getDate() - 7 * (weeks - 1));
+      const rows = await db.getAllAsync<{ started_at: string; role: string }>(
+        `SELECT w.started_at, em.role FROM workout_sets ws
+           JOIN workout_exercises we ON we.id = ws.workout_exercise_id AND we.deleted_at IS NULL
+           JOIN workouts w ON w.id = we.workout_id AND w.deleted_at IS NULL AND w.status = 'completed'
+           JOIN exercise_muscles em ON em.exercise_id = we.exercise_id AND em.muscle_group_id = ?
+          WHERE w.user_id = ? AND w.started_at >= ? AND ws.deleted_at IS NULL AND ws.is_completed = 1
+            AND ws.set_type <> 'warmup'`,
+        [muscleId, userId, first.toISOString()],
+      );
+      const buckets: WeeklyMuscleSets[] = Array.from({ length: weeks }, (_, i) => {
+        const d = new Date(first);
+        d.setDate(first.getDate() + 7 * i);
+        return { weekStart: toLocalDateKey(d), direct: 0, effective: 0 };
+      });
+      for (const r of rows) {
+        const key = toLocalDateKey(startOfWeek(new Date(r.started_at)));
+        const b = buckets.find((x) => x.weekStart === key);
+        if (!b) continue;
+        if (r.role === 'agonist') {
+          b.direct += 1;
+          b.effective += 1;
+        } else if (r.role === 'synergist') b.effective += 0.5;
+      }
+      return buckets;
+    },
+
     /** Totals of completed workouts since `fromIso` (null = whole history). Warm-ups excluded. */
     async getTrainingTotals(userId: string, fromIso: string | null): Promise<TrainingTotals> {
       const from = fromIso ?? '0000';

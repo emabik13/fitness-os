@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, ListGroup, ListRow, PhaseNotice, Screen, SectionHeader, SegmentedControl } from '@/components/ui';
+import { AppText, Button, ListGroup, ListRow, Screen, SectionHeader, SegmentedControl } from '@/components/ui';
 import { createCatalogRepository } from '@/database/repositories/catalogRepository';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { colors, radii, spacing } from '@/theme';
@@ -62,15 +63,16 @@ export function AnatomyScreen() {
       <SectionHeader title={view === 'front' ? 'Músculos · vista frontal' : 'Músculos · vista posterior'} />
       <ListGroup>
         {visible.map((m) => (
-          <ListRow key={m.id} title={m.nameEs} subtitle={REGION_LABEL[m.region]} />
+          <ListRow
+            key={m.id}
+            title={m.nameEs}
+            subtitle={REGION_LABEL[m.region]}
+            onPress={() => router.push({ pathname: '/musculo/[id]', params: { id: m.id } })}
+          />
         ))}
       </ListGroup>
 
-      <PhaseNotice
-        phase={4}
-        title="Mapa muscular interactivo"
-        description="Selección de músculos con descripción anatómica, función, ejercicios recomendados y volumen semanal registrado."
-      />
+      <Button label="Biblioteca de ejercicios" icon="library-outline" variant="secondary" onPress={() => router.push('/ejercicios')} />
     </Screen>
   );
 }

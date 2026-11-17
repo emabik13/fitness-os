@@ -15,6 +15,13 @@ export function createCatalogRepository(db: SqlExecutor) {
            FROM muscle_groups ORDER BY sort_order`,
       );
     },
+    async getMuscle(id: string): Promise<(MuscleGroup & { description: string | null; functionText: string | null }) | null> {
+      return db.getFirstAsync(
+        `SELECT id, name_es AS nameEs, region, body_view AS bodyView, description, function_text AS functionText
+           FROM muscle_groups WHERE id = ?`,
+        [id],
+      );
+    },
     async countExercises(): Promise<number> {
       const r = await db.getFirstAsync<{ n: number }>(
         'SELECT COUNT(*) AS n FROM exercises WHERE deleted_at IS NULL',
