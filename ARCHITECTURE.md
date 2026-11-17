@@ -20,6 +20,17 @@ Documento vivo. Última revisión: Fase 1 (17-nov-2026).
 
 **Development builds:** el proyecto incluye `expo-dev-client` y `eas.json` con perfiles `development`, `development-simulator`, `preview` y `production`. Expo Go no es el objetivo (R3F/expo-gl y futuras dependencias nativas lo exigen).
 
+## 1.1 Plataformas de distribución
+
+| Plataforma | Cómo | Base de datos |
+|---|---|---|
+| **Web / PWA (principal hoy)** | `scripts/build-web.js` → GitHub Pages (Actions). Instalable en iOS/Android desde el navegador, offline con service worker (`public/sw.js`). | **sql.js** (SQLite→WebAssembly, binario embebido) persistido en IndexedDB tras cada escritura confirmada (`src/database/sqlite/client.web.ts`). |
+| Android / iOS nativo | Development build con EAS (iOS en dispositivo físico requiere Apple Developer Program). | expo-sqlite (`client.ts`). |
+
+Misma base de código, mismo esquema, migraciones y repositorios: la diferencia está aislada detrás de `SqlExecutor`. Se descartó `expo-sqlite` en web porque exige `SharedArrayBuffer` (cabeceras COOP/COEP) que GitHub Pages no permite configurar y que en Safari iOS es frágil.
+
+Limitaciones de la PWA en iOS: los datos viven en el almacenamiento de la app instalada (se solicita `navigator.storage.persist()`); sin haptics; el 3D se hará con three.js sobre WebGL (soportado en Safari).
+
 ## 2. Principios
 
 1. **Offline-first.** Toda escritura va a SQLite. La red solo sirve para respaldo/sync.

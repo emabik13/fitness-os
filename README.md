@@ -5,6 +5,24 @@ Aplicación móvil (Android e iOS) de entrenamiento de fuerza, biomecánica 3D y
 - Estado del proyecto: [PROJECT_STATUS.md](./PROJECT_STATUS.md)
 - Arquitectura y decisiones: [ARCHITECTURE.md](./ARCHITECTURE.md)
 
+## Usarla en el iPhone (gratis): app web instalable (PWA)
+
+FITNESS OS se publica como **app web progresiva** en GitHub Pages. No necesita App Store ni cuenta de Apple:
+
+1. Abre en **Safari** del iPhone: `https://emabik13.github.io/fitness-os/`
+2. Pulsa **Compartir** → **Añadir a pantalla de inicio**.
+3. Ábrela desde el icono: pantalla completa, sin barra del navegador, funciona **sin conexión**.
+
+Tus datos se guardan en una base SQLite **dentro del propio iPhone** (IndexedDB). Úsala siempre desde el icono de inicio: si borras ese icono, iOS borra también sus datos (la copia de seguridad llega en una fase posterior).
+
+Cada `git push` a `main` ejecuta tests y vuelve a publicar la app automáticamente (`.github/workflows/deploy-web.yml`).
+
+Compilar la versión web en local:
+
+```bash
+npm run build:web:pages
+```
+
 ## Requisitos
 
 - Node.js 20+ (probado con 22) y npm.
@@ -23,7 +41,7 @@ cp .env.example .env
 
 (El `.env` solo será necesario a partir de la Fase 10 — Supabase.)
 
-## Probar en iPhone con Expo Go (rápido, gratis)
+## Alternativa: probar con Expo Go
 
 Mientras la app solo use módulos incluidos en Expo Go (válido hasta la Fase 3), puedes probarla así:
 

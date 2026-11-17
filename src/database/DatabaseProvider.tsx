@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { asExecutor, openDatabase } from './sqlite/client';
+import { openExecutor } from './sqlite/client';
 import { bootstrapDatabase } from './sqlite/bootstrap';
 import type { SqlExecutor } from './types';
 
@@ -35,7 +35,7 @@ export function DatabaseProvider({ children, fallback, renderError, onReady }: D
     let cancelled = false;
     (async () => {
       try {
-        const db = asExecutor(await openDatabase());
+        const db = await openExecutor();
         const { schemaVersion, userId } = await bootstrapDatabase(db);
         if (!cancelled) setState({ status: 'ready', value: { db, userId, schemaVersion } });
       } catch (e) {

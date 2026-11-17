@@ -1,0 +1,18 @@
+{
+  "id": "%BASE_URL%/",
+  "name": "FITNESS OS",
+  "short_name": "FITNESS OS",
+  "description": "Entrenamiento de fuerza, biomecánica y recomposición corporal.",
+  "lang": "es",
+  "start_url": "%BASE_URL%/",
+  "scope": "%BASE_URL%/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0B0D",
+  "theme_color": "#0A0B0D",
+  "icons": [
+    { "src": "%BASE_URL%/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "%BASE_URL%/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "%BASE_URL%/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

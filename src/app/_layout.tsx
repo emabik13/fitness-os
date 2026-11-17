@@ -17,10 +17,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { BootErrorScreen } from '@/components/BootErrorScreen';
 import { DatabaseProvider } from '@/database/DatabaseProvider';
+import { registerServiceWorker } from '@/services/pwa/registerServiceWorker';
 import { colors } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 void SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
+registerServiceWorker();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({

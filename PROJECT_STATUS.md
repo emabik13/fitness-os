@@ -1,6 +1,7 @@
 # PROJECT_STATUS — FITNESS OS
 
-**Fase actual:** Fase 1 completada → siguiente: **Fase 2 (Perfil y onboarding)**
+**Fase actual:** Fase 1 completada + versión web instalable (PWA) → siguiente: **Fase 2 (Perfil y onboarding)**
+**App publicada en:** https://emabik13.github.io/fitness-os/ (requiere activar GitHub Pages, ver abajo)
 **Última actualización:** 17-nov-2026
 
 ## Fase 0 — Auditoría y arquitectura ✅
@@ -25,18 +26,29 @@
 - Pruebas: 25 tests (migraciones sobre SQLite real, repositorios con el ejemplo 40×12/11/10, utilidades, geometría, navegación de las 5 pestañas y filtros).
 - Verificado: `typecheck` ✔, `lint` ✔, `jest` 25/25 ✔, `expo-doctor` 20/20 ✔, `expo export` Android + iOS (bundles Hermes) ✔, capturas a tamaño iPhone 13 revisadas.
 
+## Plataforma web / PWA ✅ (decisión: sin coste, sin Apple Developer Program)
+- SQLite en web con sql.js + IndexedDB, persistencia tras cada escritura confirmada; probado con recarga simulada y rollback (3 tests).
+- PWA: manifiesto, iconos propios, metadatos iOS (pantalla completa, barra de estado), service worker con soporte offline.
+- Despliegue automático a GitHub Pages en cada push a `main` (con typecheck, lint y tests como requisito).
+- Verificado en Chromium emulando iPhone 13, servido bajo `/fitness-os/` como en GitHub Pages: carga, navegación, deep links, persistencia en IndexedDB, service worker activo y **carga sin conexión**.
+
 ## Pendiente
 - Fase 2: onboarding (Zod), edición de perfil, registro de peso, equipamiento disponible.
 - Fase 3: biblioteca de ejercicios con contenido verificado, filtros y fichas.
 - Fase 4: visor 3D (R3F + expo-gl), manifiesto GLB, fallback 2D. **Requiere recursos GLB con licencia.**
+- Exportar/importar copia de seguridad (JSON) de los datos locales — prioritario para la PWA antes de Supabase.
 - Fases 5–11 según plan.
 
 ## Errores conocidos / limitaciones
+- **GitHub Pages aún no está activo**: el repositorio es privado y GitHub Pages gratis solo publica repositorios públicos (o requiere GitHub Pro). Ver "Próximos pasos".
+- No probado todavía en Safari real de iPhone (solo motor Chromium con emulación). Primera verificación: abrir la URL en el iPhone 17.
+- Los datos de la PWA viven solo en el dispositivo hasta implementar exportación/copia de seguridad (añadido como pendiente prioritario).
 - La app **no se ha ejecutado aún en un dispositivo o emulador real**: este entorno no tiene Android SDK/Xcode. Se validó compilando los bundles nativos y con una vista web de QA. Primer paso recomendado: `eas build --profile development`.
 - Los grupos musculares no tienen descripción ni función aún (se dejan vacíos en lugar de inventarlos; se completan en Fases 3/4).
 - Identificadores de app provisionales: `com.fitnessos.app` (cámbialos si tienes un dominio propio antes de publicar).
 - Se eliminó el `LICENSE` de la plantilla (atribuía el copyright a Expo). La licencia del producto está por decidir.
 
 ## Próximos pasos
+0. Activar la publicación: hacer público el repositorio y en Settings → Pages → Source elegir **GitHub Actions**.
 1. Fase 2: flujo de onboarding multipaso con validación Zod, guardado en `user_profiles`/`user_equipment`/`body_weight_entries`, edición desde Perfil.
 2. Generar el primer development build con EAS y probar en un Android y un iPhone reales.
